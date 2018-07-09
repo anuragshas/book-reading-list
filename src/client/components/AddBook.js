@@ -11,8 +11,20 @@ class AddBook extends Component {
       name: '',
       genre: '',
       authorId: '',
+      disableButton: true,
     };
   }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (
+      this.state.name !== prevState.name ||
+      this.state.genre !== prevState.genre ||
+      this.state.authorId !== prevState.authorId
+    ) {
+      this.checkEmptyFields();
+    }
+  }
+
   displayAuthors() {
     const data = this.props.getAuthorsQuery;
     if (data.loading) {
@@ -25,42 +37,70 @@ class AddBook extends Component {
     ));
   }
 
+  checkEmptyFields() {
+    if (this.state.name && this.state.genre && this.state.authorId) {
+      this.setState({ disableButton: false });
+    } else if (!this.state.disableButton) {
+      this.setState({ disableButton: true });
+    }
+  }
+
   submitForm(e) {
     e.preventDefault();
-    this.props.addBookMutation({
-      variables: {
-        name: this.state.name,
-        genre: this.state.genre,
-        authorId: this.state.authorId,
-      },
-      refetchQueries: [{ query: getBooksQuery }],
-    });
-    this.setState({
-      name: '',
-      genre: '',
-      authorId: '',
-    });
+    if (this.state.name && this.state.genre && this.state.authorId) {
+      this.props.addBookMutation({
+        variables: {
+          name: this.state.name,
+          genre: this.state.genre,
+          authorId: this.state.authorId,
+        },
+        refetchQueries: [{ query: getBooksQuery }],
+      });
+      this.setState({
+        name: '',
+        genre: '',
+        authorId: '',
+      });
+    }
   }
 
   render() {
+    console.log(this.state);
     return (
       <form id="add-book" onSubmit={e => this.submitForm(e)}>
         <div className="field">
           <label>Book name:</label>
-          <input type="text" onChange={e => this.setState({ name: e.target.value })} />
+          <input
+            type="text"
+            onChange={e => {
+              this.setState({ name: e.target.value });
+            }}
+            value={this.state.name}
+          />
         </div>
         <div className="field">
           <label>Genre:</label>
-          <input type="text" onChange={e => this.setState({ genre: e.target.value })} />
+          <input
+            type="text"
+            onChange={e => {
+              this.setState({ genre: e.target.value });
+            }}
+            value={this.state.genre}
+          />
         </div>
         <div className="field">
           <label>Author:</label>
-          <select onChange={e => this.setState({ authorId: e.target.value })}>
-            <option>Select author</option>
+          <select
+            onChange={e => {
+              this.setState({ authorId: e.target.value });
+            }}
+            value={this.state.authorId}
+          >
+            <option value="">Select author</option>
             {this.displayAuthors()}
           </select>
         </div>
-        <button>+</button>
+        <button disabled={this.state.disableButton}>+</button>
       </form>
     );
   }
