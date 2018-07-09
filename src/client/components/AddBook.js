@@ -65,7 +65,6 @@ class AddBook extends Component {
   }
 
   render() {
-    console.log(this.state);
     return (
       <form id="add-book" onSubmit={e => this.submitForm(e)}>
         <div className="field">
